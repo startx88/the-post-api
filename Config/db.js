@@ -1,4 +1,4 @@
 module.exports = {
-    MONGO_DB: 'mongodb://localhost:27017/thepost',
+    MONGO_DB: `mongodb://learnui:learnui88@ds241258.mlab.com:41258/thepost`,
     SECRET_KEY: 'iloaveyousukkuandloveyoujs'
 }
