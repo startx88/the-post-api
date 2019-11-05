@@ -7,7 +7,7 @@ const Config = require('./Config/db')
 
 // App
 const app = express();
-const PORT = process.env.port || 8080;
+const PORT = process.env.PORT || 8080;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
