@@ -1,5 +1,7 @@
 {
-    "DATABASE": "thepost",
-    "USER": "learnui",
-    "PASSWORD": "learnui88"
+    "env": {
+        "DATABASE": "thepost",
+        "USER": "learnui",
+        "PASSWORD": "learnui88"
+    }
 }

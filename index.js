@@ -21,10 +21,12 @@ app.use((req, res, next) => {
     next();
 })
 
+
 const postRouter = require('./routes/post');
 const authRouter = require('./routes/auth')
 app.use('/api/post', postRouter)
 app.use('/api/user', authRouter)
+
 /**
  * Errors
  */
@@ -33,7 +35,8 @@ app.use((req, res, next) => {
     const error = new Error("Page not found!");
     error.statusCode = 404;
     next(error)
-})
+});
+
 app.use((error, req, res, next) => {
     res.status(error.statusCode || 500).json({
         errors: {
@@ -42,6 +45,7 @@ app.use((error, req, res, next) => {
         }
     })
 })
+
 
 
 // Database connection
