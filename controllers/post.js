@@ -14,6 +14,7 @@ exports.getPosts = async (req, res, next) => {
             error.statusCode = 404;
             next(error)
         }
+        console.log(posts)
         res.status(200).json({
             success: true,
             total: count,
@@ -21,10 +22,18 @@ exports.getPosts = async (req, res, next) => {
                 return {
                     id: item._id,
                     title: item.title,
-                    discription: item.discription,
-                    imageUrl: 'http://localhost:8080/' + item.imageUrl,
+                    description: item.description,
+                    imageUrl: 'https://the-post-api.herokuapp.com/' + item.imageUrl,
+                    author: {
+                        _id: item.author._id,
+                        firstname: item.author.firstname,
+                        lastname: item.author.lastname,
+                        email: item.author.email,
+                        mobile: item.author.mobile
+                    },
+
                     api: {
-                        url: 'http://localhost:8080/api/post' + req.url,
+                        url: 'https://the-post-api.herokuapp.com/api/post' + req.url,
                         method: 'GET'
                     }
                 }
@@ -47,7 +56,7 @@ exports.getPost = async (req, res, next) => {
     const id = req.params.postId;
     console.log(id)
     try {
-        const post = await Post.findById(id);
+        const post = await Post.findById(id).populate('author');
         if (!post) {
             const error = new Error('There is no posts');
             error.statusCode = 404;
@@ -58,9 +67,17 @@ exports.getPost = async (req, res, next) => {
             data: {
                 id: post._id,
                 title: post.title,
-                body: post.body,
+                description: post.description,
+                imageUrl: 'https://the-post-api.herokuapp.com/' + post.imageUrl,
+                author: {
+                    _id: post.author._id,
+                    firstname: post.author.firstname,
+                    lastname: post.author.lastname,
+                    email: post.author.email,
+                    mobile: post.author.mobile
+                },
                 api: {
-                    url: 'http://localhost:8080/api/post' + req.url,
+                    url: 'https://the-post-api.herokuapp.com/api/post' + req.url,
                     method: 'GET'
                 }
             }
@@ -82,15 +99,16 @@ exports.addPost = async (req, res, next) => {
     if (!errors.isEmpty()) {
         const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
-        throw next(error);
+        next(error);
     }
+    console.log(req.body)
     const title = req.body.title;
-    const discription = req.body.discription;
+    const description = req.body.description;
     let image = req.file;
     try {
         const post = new Post({
             title: title,
-            discription: discription,
+            description: description,
             imageUrl: image.path,
             author: req.user.userId
         });
@@ -125,7 +143,7 @@ exports.updatePost = async (req, res, next) => {
     try {
         const existPost = await Post.findById(id);
         existPost.title = req.body.title;
-        existPost.body = req.body.body;
+        existPost.description = req.body.description;
         const result = await existPost.save();
         res.status(200).json({
             success: true,

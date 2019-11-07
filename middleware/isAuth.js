@@ -19,12 +19,13 @@ exports.isAuth = (req, res, next) => {
     } catch (error) {
         next(error);
     }
+
     if (!isVerify) {
         const error = new Error("Unauthorized");
         error.statusCode = 401;
         next(error);
     }
-    console.log('ISVERITYY', isVerify);
+
 
     req.user = isVerify
     next()
