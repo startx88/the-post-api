@@ -6,9 +6,8 @@ const { validationResult } = require('express-validator');
  */
 
 exports.getPosts = async (req, res, next) => {
-    console.log(req.baseUrl)
     try {
-        const posts = await Post.find();
+        const posts = await Post.find().populate('author');
         const count = await Post.find().countDocuments;
         if (!posts) {
             const error = new Error('There is no posts');
@@ -22,7 +21,8 @@ exports.getPosts = async (req, res, next) => {
                 return {
                     id: item._id,
                     title: item.title,
-                    body: item.body,
+                    discription: item.discription,
+                    imageUrl: 'http://localhost:8080/' + item.imageUrl,
                     api: {
                         url: 'http://localhost:8080/api/post' + req.url,
                         method: 'GET'
@@ -82,14 +82,17 @@ exports.addPost = async (req, res, next) => {
     if (!errors.isEmpty()) {
         const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
-        next(error);
+        throw next(error);
     }
-    const { title, body } = req.body;
-    console.log(req.body)
+    const title = req.body.title;
+    const discription = req.body.discription;
+    let image = req.file;
     try {
         const post = new Post({
             title: title,
-            body: body,
+            discription: discription,
+            imageUrl: image.path,
+            author: req.user.userId
         });
 
         const result = await post.save();

@@ -24,6 +24,8 @@ exports.isAuth = (req, res, next) => {
         error.statusCode = 401;
         next(error);
     }
+    console.log('ISVERITYY', isVerify);
+
     req.user = isVerify
     next()
 }

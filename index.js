@@ -8,19 +8,17 @@ const Config = require('./Config/db')
 // App
 const app = express();
 const PORT = process.env.PORT || 8080;
+app.use(express.static(path.join(__dirname, 'public')))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'public')))
-
-
 // Cors Policy
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     next();
 })
-
 
 const postRouter = require('./routes/post');
 const authRouter = require('./routes/auth')
