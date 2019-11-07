@@ -10,16 +10,16 @@ const { fileTypes } = require('../middleware/filetype')
 const router = express.Router();
 
 const Storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: async function (req, file, cb) {
         const dir = `./uploads/posts/${req.user.userId}`;
         fs.exists(dir, error => {
             if (!error) {
-                return fs.mkdir(dir, err => cb(err, dir))
+                fs.mkdir(dir, { recursive: true }, err => cb(err, dir))
             }
         })
-        return cb(null, dir)
+        cb(null, dir)
     },
-    filename: function (req, file, cb) {
+    filename: async function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname)
     }
 });
