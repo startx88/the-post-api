@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(express.static(path.join(__dirname, 'public')))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 // Cors Policy
 app.use((req, res, next) => {

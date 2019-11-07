@@ -1,5 +1,6 @@
 const fs = require('fs')
 const express = require('express');
+const mkdirp = require('mkdirp')
 const multer = require('multer');
 const postController = require('../controllers/post')
 const { body } = require('express-validator');
@@ -12,12 +13,13 @@ const router = express.Router();
 const Storage = multer.diskStorage({
     destination: async function (req, file, cb) {
         const dir = `./uploads/posts/${req.user.userId}`;
-        fs.exists(dir, error => {
-            if (!error) {
-                fs.mkdir(dir, { recursive: true }, err => cb(err, dir))
-            }
-        })
-        cb(null, dir)
+        if (!fs.existsSync(dir)) {
+            mkdirp.sync(dir, err => {
+                if (err) throw new Error('directory not existed');
+                cb(null, dir)
+            })
+        }
+        return cb(null, dir)
     },
     filename: async function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname)
