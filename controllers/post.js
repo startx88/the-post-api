@@ -1,6 +1,6 @@
 const Post = require('../models/post');
 const { validationResult } = require('express-validator');
-
+const { deleteFile } = require('../middleware/deletefile')
 /**
  * Get Posts
  */
@@ -101,7 +101,6 @@ exports.addPost = async (req, res, next) => {
         error.statusCode = 422;
         next(error);
     }
-    console.log(req.body)
     const title = req.body.title;
     const description = req.body.description;
     let image = req.file;
@@ -112,7 +111,6 @@ exports.addPost = async (req, res, next) => {
             imageUrl: image.path,
             author: req.user.userId
         });
-
         const result = await post.save();
         res.status(201).json({
             success: true,
@@ -125,7 +123,6 @@ exports.addPost = async (req, res, next) => {
         }
         next(err)
     }
-
 }
 
 /**
@@ -140,10 +137,21 @@ exports.updatePost = async (req, res, next) => {
         error.statusCode = 422;
         next(error);
     }
+    const existPost = await Post.findById(id);
+    if (!existPost) {
+        const error = new Error('There is no post by this id');
+        error.statusCode = 404;
+        next(error);
+    }
+    let image = req.file;
+
     try {
-        const existPost = await Post.findById(id);
         existPost.title = req.body.title;
         existPost.description = req.body.description;
+        if (image) {
+            deleteFile(existPost.imageUrl);
+            existPost.imageUrl = image.path
+        }
         const result = await existPost.save();
         res.status(200).json({
             success: true,
