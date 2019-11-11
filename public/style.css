@@ -29,6 +29,8 @@ html,
 body {
     height: 100%;
     background-color: #333;
+
+
 }
 
 body {
@@ -37,12 +39,29 @@ body {
     color: #fff;
     text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
     box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+    font-size: 12px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .cover-container {
     max-width: 42em;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Ubuntu', sans-serif;
+}
+
+p {
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 300;
+
+}
 
 /*
  * Header
@@ -106,4 +125,9 @@ body {
  */
 .mastfoot {
     color: rgba(255, 255, 255, .5);
+
+}
+
+.mastfoot p {
+    font-size: 12px;
 }
