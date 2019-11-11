@@ -137,6 +137,8 @@ exports.updatePost = async (req, res, next) => {
         error.statusCode = 422;
         next(error);
     }
+
+
     const existPost = await Post.findById(id);
     if (!existPost) {
         const error = new Error('There is no post by this id');
