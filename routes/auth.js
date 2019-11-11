@@ -2,11 +2,10 @@ const express = require('express');
 const authController = require('../controllers/auth')
 const Auth = require('../models/auth')
 const { body } = require('express-validator')
+const { isAuth } = require('../middleware/isAuth')
 const router = express.Router();
 
-/**
- * Sign Up
- */
+/*** Sign Up */
 router.post('/signup', [
     body('firstname', "First name is required!").not().isEmpty(),
     body('firstname', "First name is required!").not().isEmpty(),
@@ -28,11 +27,14 @@ router.post('/signup', [
     body('mobile', "Mobile is required!").not().isEmpty(),
 ], authController.signup)
 
-/**
- * Sign in
- */
+/*** Sign in */
 router.post('/signin', [body('email', "First name is required!").not().isEmpty(),
-body('password', "First name is required!").not().isEmpty(),], authController.signin)
+body('password', "First name is required!").not().isEmpty(),], authController.signin);
 
 
+/*** Get user profiles */
+router.get('/profiles', isAuth, authController.getProfile);
+
+
+/*** Export the */
 module.exports = router;

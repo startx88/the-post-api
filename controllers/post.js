@@ -1,5 +1,6 @@
-// post
 const Post = require('../models/post');
+const Auth = require('../models/auth');
+const Comment = require('../models/comment')
 const { validationResult } = require('express-validator');
 const { deleteFile } = require('../middleware/deletefile')
 /**
@@ -15,7 +16,6 @@ exports.getPosts = async (req, res, next) => {
             error.statusCode = 404;
             next(error)
         }
-        console.log(posts)
         res.status(200).json({
             success: true,
             total: count,
@@ -32,7 +32,6 @@ exports.getPosts = async (req, res, next) => {
                         email: item.author.email,
                         mobile: item.author.mobile
                     },
-
                     api: {
                         url: 'https://the-post-api.herokuapp.com/api/post' + req.url,
                         method: 'GET'
@@ -55,7 +54,6 @@ exports.getPosts = async (req, res, next) => {
 
 exports.getPost = async (req, res, next) => {
     const id = req.params.postId;
-    console.log(id)
     try {
         const post = await Post.findById(id).populate('author');
         if (!post) {
@@ -105,6 +103,8 @@ exports.addPost = async (req, res, next) => {
     const title = req.body.title;
     const description = req.body.description;
     let image = req.file;
+    const Auther = await Auth.findById(req.user.userId);
+    console.log(Auther, req.user)
     try {
         const post = new Post({
             title: title,
@@ -112,7 +112,9 @@ exports.addPost = async (req, res, next) => {
             imageUrl: image.path,
             author: req.user.userId
         });
+        Auther.posts.push(post);
         const result = await post.save();
+        await Auther.save();
         res.status(201).json({
             success: true,
             postId: result._id,
@@ -138,8 +140,6 @@ exports.updatePost = async (req, res, next) => {
         error.statusCode = 422;
         next(error);
     }
-
-
     const existPost = await Post.findById(id);
     if (!existPost) {
         const error = new Error('There is no post by this id');
@@ -147,7 +147,6 @@ exports.updatePost = async (req, res, next) => {
         next(error);
     }
     let image = req.file;
-
     try {
         existPost.title = req.body.title;
         existPost.description = req.body.description;
@@ -173,10 +172,18 @@ exports.updatePost = async (req, res, next) => {
 /**
  * Delete Posts
  */
-
 exports.deletePost = async (req, res, next) => {
     const id = req.params.postId;
     try {
+        const isPost = await Post.findById(id);
+        if (!isPost) {
+            const error = new Error('There is no post by this id');
+            error.statusCode = 404;
+            next(error);
+        }
+        if (isPost) {
+            deleteFile(isPost.imageUrl)
+        }
         const post = await Post.deleteOne({ _id: id });
         res.status(200).json({
             success: true,

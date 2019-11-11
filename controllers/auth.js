@@ -79,8 +79,25 @@ exports.signin = async (req, res, next) => {
 /**
  * user profile
  */
-exports.getProfile = (req, res, next) => {
-
+exports.getProfile = async (req, res, next) => {
+    const userId = req.user.userId;
+    try {
+        const user = await Auth.findById(userId).select('_id firstname lastname email mobile posts');
+        if (!user) {
+            const error = new Error('Unauthorized access!');
+            error.statusCode = 401;
+            next(error)
+        }
+        return res.json({
+            success: true,
+            data: user
+        })
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err)
+    }
 }
 
 /**
