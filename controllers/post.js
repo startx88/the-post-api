@@ -8,9 +8,15 @@ const { deleteFile } = require('../middleware/deletefile')
  */
 
 exports.getPosts = async (req, res, next) => {
+    const page = req.query.page || 1;
+    const PER_PAGE = 6;
     try {
-        const posts = await Post.find().populate('author');
-        const count = await Post.find().countDocuments;
+        const posts = await Post.find()
+            .skip((page - 1) * PER_PAGE)
+            .limit(PER_PAGE)
+            .populate('author');
+
+        const totalPage = await Post.find().countDocuments();
         if (!posts) {
             const error = new Error('There is no posts');
             error.statusCode = 404;
@@ -18,7 +24,12 @@ exports.getPosts = async (req, res, next) => {
         }
         res.status(200).json({
             success: true,
-            total: count,
+            total: totalPage,
+            curPage: page,
+            nextPage: page + 1,
+            prevPage: page - 1,
+            hasNextPage: (page * PER_PAGE) < totalPage,
+            lastPage: Math.ceil(totalPage / PER_PAGE),
             data: posts.map(item => {
                 return {
                     id: item._id,
