@@ -1,3 +1,4 @@
+// post
 const Post = require('../models/post');
 const { validationResult } = require('express-validator');
 const { deleteFile } = require('../middleware/deletefile')

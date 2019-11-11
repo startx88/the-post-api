@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose')
 const Config = require('./Config/db')
 
-// App
+// Apps 
 const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(express.static(path.join(__dirname, 'public')))
