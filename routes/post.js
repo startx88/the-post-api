@@ -31,15 +31,15 @@ const upload = multer({ storage: Storage, fileFilter: fileTypes })
 
 // Routes
 router.get('/', postController.getPosts);
-router.get('/:postId', postController.getPost);
-router.post('/add', isAuth, upload.single('image'), [
+router.post('/', isAuth, upload.single('image'), [
     body('title', "Title field is required!").not().isEmpty().isLength({ min: 3 }),
     body('description', "Description field is requied!").not().isEmpty().isLength({ min: 3 })
 ], postController.addPost);
-router.put('/update/:postId', isAuth, upload.single('image'), [
+router.get('/:postId', postController.getPost);
+router.put('/:postId', isAuth, upload.single('image'), [
     body('title', "Title field is required!").not().isEmpty().isLength({ min: 3 }),
     body('description', "Desdiscriptioncription field is requied!").not().isEmpty().isLength({ min: 3 })
 ], postController.updatePost);
-router.delete('/delete/:postId', isAuth, postController.deletePost);
+router.delete('/:postId', isAuth, postController.deletePost);
 
 module.exports = router;

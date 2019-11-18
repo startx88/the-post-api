@@ -105,6 +105,7 @@ exports.getPost = async (req, res, next) => {
  */
 
 exports.addPost = async (req, res, next) => {
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error(errors.array()[0].msg);
@@ -115,7 +116,7 @@ exports.addPost = async (req, res, next) => {
     const description = req.body.description;
     let image = req.file;
     const Auther = await Auth.findById(req.user.userId);
-    console.log(Auther, req.user)
+ 
     try {
         const post = new Post({
             title: title,
@@ -144,28 +145,54 @@ exports.addPost = async (req, res, next) => {
  */
 
 exports.updatePost = async (req, res, next) => {
+    // Post Id
     const id = req.params.postId;
+
+    // Check the error
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error(errors.array()[0].msg);
         error.statusCode = 422;
         next(error);
     }
-    const existPost = await Post.findById(id);
-    if (!existPost) {
-        const error = new Error('There is no post by this id');
-        error.statusCode = 404;
-        next(error);
+
+    const title = req.body.title;
+    const description = req.body.description;
+    let imageUrl = req.body.image;
+
+    if(req.file){
+        imageUrl=req.file.path;
     }
-    let image = req.file;
+    
+    if(!imageUrl){
+        const error = new Error('No file picked.');
+        error.statusCode = 422;
+        throw error;
+    }
+
     try {
-        existPost.title = req.body.title;
-        existPost.description = req.body.description;
-        if (image) {
-            deleteFile(existPost.imageUrl);
-            existPost.imageUrl = image.path
+        const post = await Post.findById(id);
+        if (!post) {
+            const error = new Error('Could not found Post!');
+            error.statusCode = 404;
+            next(error);
         }
-        const result = await existPost.save();
+
+        if (post.author.toString() !== req.user.userId) {
+            const error = new Error('Not authorized!');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if (imageUrl!==post.imageUrl) {
+            deleteFile(post.imageUrl);
+        }
+
+        post.title = title;
+        post.description = description;
+        post.imageUrl=imageUrl;
+
+        const result = await post.save();
         res.status(200).json({
             success: true,
             message: 'Post update successfully',
@@ -184,18 +211,30 @@ exports.updatePost = async (req, res, next) => {
  * Delete Posts
  */
 exports.deletePost = async (req, res, next) => {
-    const id = req.params.postId;
+    // Post Id
+    const postId = req.params.postId;
     try {
-        const isPost = await Post.findById(id);
-        if (!isPost) {
-            const error = new Error('There is no post by this id');
+        const post = await Post.findById(postId);
+        if (!post) {
+            const error = new Error('Could not find post!');
             error.statusCode = 404;
             next(error);
         }
-        if (isPost) {
-            deleteFile(isPost.imageUrl)
+        if(post.author.toString()!== req.user.userId){
+            const error = new Error('Not authorized!');
+            error.statusCode = 403;
+            next(error);
         }
-        const post = await Post.deleteOne({ _id: id });
+        // image deleted
+        deleteFile(post.imageUrl);
+        await Post.findByIdAndRemove(postId);
+
+        // post delete from authorized users
+        const user = await Auth.findById(req.user.userId);
+        user.posts.pull(post._id);
+        await user.save();
+        
+        // send response
         res.status(200).json({
             success: true,
             message: "Post deleted successfull.",
